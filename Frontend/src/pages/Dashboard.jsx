@@ -145,7 +145,7 @@ export default function Dashboard() {
               transition={{ duration: 0.5 }}
               className="flex-1 h-screen overflow-y-auto relative"
             >
-              <Navbar activeTab={activeTab} />
+              <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
               
               <AnimatePresence mode="wait">
                 {activeTab === "dashboard" && (

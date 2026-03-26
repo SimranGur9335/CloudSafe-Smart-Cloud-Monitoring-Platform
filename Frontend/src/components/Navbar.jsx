@@ -2,12 +2,12 @@ import { Bell, UserCircle, Search, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
-export default function Navbar({ activeTab = "dashboard" }) {
+export default function Navbar({ activeTab = "dashboard", setActiveTab }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([
-    { id: 1, message: "Unusual login attempt detected", type: "critical", time: "2 min ago", isRead: false },
-    { id: 2, message: "Database backup completed", type: "success", time: "1 hour ago", isRead: false },
-    { id: 3, message: "New admin user added", type: "info", time: "3 hours ago", isRead: false },
+    { id: 1, message: "Unusual login attempt detected", type: "critical", time: "2 min ago", isRead: false, targetTab: "alerts" },
+    { id: 2, message: "Database backup completed", type: "success", time: "1 hour ago", isRead: false, targetTab: "analytics" },
+    { id: 3, message: "New admin user added", type: "info", time: "3 hours ago", isRead: false, targetTab: "settings" },
   ]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -92,7 +92,13 @@ export default function Navbar({ activeTab = "dashboard" }) {
                           key={notif.id}
                           initial={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
-                          onClick={() => setNotifications(notifications.map(n => n.id === notif.id ? { ...n, isRead: true } : n))}
+                          onClick={() => {
+                            setNotifications(notifications.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
+                            if (setActiveTab && notif.targetTab) {
+                              setActiveTab(notif.targetTab);
+                              setShowNotifications(false);
+                            }
+                          }}
                           className={`p-4 border-b border-gray-800/50 hover:bg-white/5 transition-all cursor-pointer group ${notif.isRead ? 'opacity-50 bg-[#0b0f19]/30' : ''}`}
                         >
                           <div className="flex gap-3 items-start">
