@@ -145,7 +145,7 @@ export default function Dashboard() {
               transition={{ duration: 0.5 }}
               className="flex-1 h-screen overflow-y-auto relative"
             >
-              <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+              <Navbar activeTab={activeTab} setActiveTab={setActiveTab} setSettingsView={setSettingsView} />
               
               <AnimatePresence mode="wait">
                 {activeTab === "dashboard" && (
@@ -225,6 +225,24 @@ export default function Dashboard() {
                         />
                         <span id="gen-btn-text" className="font-medium">Generate Report</span>
                       </motion.button>
+                      
+                      <div className="w-full max-w-2xl mt-12 bg-gray-800/30 border border-gray-800 rounded-xl overflow-hidden text-left z-10 transition-all">
+                        <div className="p-4 border-b border-gray-800 bg-[#0b0f19]/80 backdrop-blur"><h3 className="text-white font-medium text-sm">Recent Background Operations</h3></div>
+                        <div className="p-0">
+                          <div className="flex justify-between p-4 border-b border-gray-800/50 hover:bg-white/5 items-center transition-colors">
+                            <span className="text-sm text-gray-300 flex items-center gap-2"><div className="w-1.5 h-1.5 bg-neon-cyan rounded-full animate-pulse"></div>Database backup completed</span>
+                            <span className="text-[10px] text-neon-cyan border border-neon-cyan/30 bg-neon-cyan/10 px-2 py-0.5 rounded font-mono shadow-[0_0_5px_rgba(0,255,204,0.1)]">1 HOUR AGO</span>
+                          </div>
+                          <div className="flex justify-between p-4 border-b border-gray-800/50 hover:bg-white/5 items-center transition-colors">
+                            <span className="text-sm text-gray-400 flex items-center gap-2"><div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>Historical Log Aggregation</span>
+                            <span className="text-[10px] text-green-500 border border-green-500/30 bg-green-500/10 px-2 py-0.5 rounded font-mono">SUCCESS</span>
+                          </div>
+                          <div className="flex justify-between p-4 hover:bg-white/5 items-center transition-colors">
+                            <span className="text-sm text-gray-400 flex items-center gap-2"><div className="w-1.5 h-1.5 bg-neon-blue rounded-full"></div>Threat Intelligence List Sync</span>
+                            <span className="text-[10px] text-neon-blue border border-neon-blue/30 bg-neon-blue/10 px-2 py-0.5 rounded font-mono">COMPLETE</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -255,7 +273,7 @@ export default function Dashboard() {
                               <ShieldAlert className="w-5 h-5" />
                             </div>
                             <div>
-                              <h3 className={`font-medium transition-colors ${expandedAlert === i ? 'text-neon-red' : 'text-white'}`}>Unauthorized Access Attempt Blocked</h3>
+                              <h3 className={`font-medium transition-colors ${expandedAlert === i ? 'text-neon-red' : 'text-white'}`}>{i === 1 ? 'Unusual login attempt detected' : 'Unauthorized Access Attempt Blocked'}</h3>
                               <span className="text-sm text-gray-500 font-mono">IP: 192.168.1.{i * 10} • Port: 22</span>
                             </div>
                           </div>
@@ -340,6 +358,16 @@ export default function Dashboard() {
                           }`}
                         >
                           <span className="font-medium">Webhooks</span>
+                        </motion.div>
+                        <motion.div 
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setSettingsView(settingsView === 'users' ? null : 'users')}
+                          className={`w-36 h-12 rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                            settingsView === 'users' ? 'bg-purple-500/10 border-purple-500 text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.2)]' : 'border-gray-700 bg-gray-800/50 text-gray-400 hover:border-purple-500/50 hover:text-purple-400/80'
+                          }`}
+                        >
+                          <span className="font-medium">Access Control</span>
                         </motion.div>
                       </div>
 
@@ -450,6 +478,38 @@ export default function Dashboard() {
                                   </motion.div>
                                 ))}
                               </AnimatePresence>
+                            </div>
+                          </motion.div>
+                        )}
+                        {settingsView === 'users' && (
+                          <motion.div
+                            key="users-view"
+                            initial={{ opacity: 0, height: 0, y: -20 }}
+                            animate={{ opacity: 1, height: 'auto', y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -20 }}
+                            className="w-full max-w-2xl mt-8 text-left bg-[#0b0f19] p-6 rounded-xl border border-gray-800/50 shadow-xl shrink-0 mb-10 overflow-visible"
+                          >
+                            <div className="flex justify-between items-center mb-6">
+                              <h3 className="text-white font-medium text-lg">Platform Users & Roles</h3>
+                              <button className="px-4 py-1.5 bg-purple-500/10 text-purple-400 border border-purple-500/30 rounded-lg text-sm hover:bg-purple-500 hover:text-white transition-colors">
+                                Invite User
+                              </button>
+                            </div>
+                            <div className="space-y-4 w-full">
+                              <div className="p-4 bg-gray-800/30 border border-gray-800 rounded-lg flex justify-between items-center transition-all hover:border-gray-600">
+                                <div>
+                                  <div className="text-white font-medium flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-[pulse_2s_ease-in-out_Infinity] shadow-[0_0_5px_rgba(168,85,247,0.8)]"></span>New admin user added</div>
+                                  <div className="text-gray-500 font-mono text-xs mt-1 ml-4">harrison.admin@cloudsafe.internal</div>
+                                </div>
+                                <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[11px] font-mono rounded-md shadow-[0_0_8px_rgba(168,85,247,0.1)]">SUPERADMIN</span>
+                              </div>
+                              <div className="p-4 bg-gray-800/30 border border-gray-800 rounded-lg flex justify-between items-center transition-all hover:border-gray-600">
+                                <div>
+                                  <div className="text-white font-medium flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>SimranGur9335</div>
+                                  <div className="text-gray-500 font-mono text-xs mt-1 ml-4">simran.gur@example.com</div>
+                                </div>
+                                <span className="px-3 py-1 bg-neon-cyan/10 border border-neon-cyan/20 text-neon-cyan text-[11px] font-mono rounded-md">OWNER</span>
+                              </div>
                             </div>
                           </motion.div>
                         )}
