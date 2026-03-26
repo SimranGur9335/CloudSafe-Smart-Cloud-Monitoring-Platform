@@ -11,6 +11,21 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [expandedAlert, setExpandedAlert] = useState(null);
   const [settingsView, setSettingsView] = useState(null);
+  
+  const [apiKeys, setApiKeys] = useState([
+    { id: 1, name: "Production SIEM API", key: "pk_live_8f92bd3a...", type: "Active" },
+    { id: 2, name: "Staging Log Ingest", key: "pk_test_1c24fa90...", type: "Dev" }
+  ]);
+  const [isGeneratingKey, setIsGeneratingKey] = useState(false);
+
+  const handleGenerateKey = () => {
+    setIsGeneratingKey(true);
+    setTimeout(() => {
+      const newKeyString = "pk_live_" + Math.random().toString(36).substring(2, 10) + "...";
+      setApiKeys([{ id: Date.now(), name: "Custom Integration Key", key: newKeyString, type: "Active" }, ...apiKeys]);
+      setIsGeneratingKey(false);
+    }, 1500);
+  };
 
   useEffect(() => {
     // Simulate initial scan and loading sequence
@@ -319,25 +334,49 @@ export default function Dashboard() {
                           >
                             <div className="flex justify-between items-center mb-6">
                               <h3 className="text-white font-medium text-lg">Active API Keys</h3>
-                              <button className="px-4 py-1.5 bg-neon-blue/10 text-neon-blue border border-neon-blue/30 rounded-lg text-sm hover:bg-neon-blue hover:text-white transition-colors">
-                                Generate New Key
-                              </button>
+                              <motion.button 
+                                onClick={handleGenerateKey}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                disabled={isGeneratingKey}
+                                className="px-4 py-1.5 bg-neon-blue/10 text-neon-blue border border-neon-blue/30 rounded-lg text-sm hover:bg-neon-blue hover:text-white transition-colors flex items-center gap-2"
+                              >
+                                {isGeneratingKey ? (
+                                  <>
+                                    <motion.div 
+                                      animate={{ rotate: 360 }} 
+                                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                      className="w-3 h-3 border-2 border-t-transparent border-current rounded-full"
+                                    />
+                                    Generating...
+                                  </>
+                                ) : (
+                                  "Generate New Key"
+                                )}
+                              </motion.button>
                             </div>
-                            <div className="space-y-3">
-                              <div className="flex justify-between items-center p-3 bg-gray-800/30 border border-gray-800 rounded-lg">
-                                <div>
-                                  <div className="text-gray-300 font-medium">Production SIEM API</div>
-                                  <div className="text-gray-500 font-mono text-xs mt-1">pk_live_8f92bd3a...</div>
-                                </div>
-                                <span className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded-full">Active</span>
-                              </div>
-                              <div className="flex justify-between items-center p-3 bg-gray-800/30 border border-gray-800 rounded-lg">
-                                <div>
-                                  <div className="text-gray-300 font-medium">Staging Log Ingest</div>
-                                  <div className="text-gray-500 font-mono text-xs mt-1">pk_test_1c24fa90...</div>
-                                </div>
-                                <span className="px-2 py-1 bg-neon-cyan/10 text-neon-cyan text-xs rounded-full">Dev</span>
-                              </div>
+                            <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 overflow-x-hidden custom-scrollbar">
+                              <AnimatePresence>
+                                {apiKeys.map(keyData => (
+                                  <motion.div 
+                                    key={keyData.id}
+                                    initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, height: 'auto', scale: 1 }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="flex justify-between items-center p-3 bg-gray-800/30 border border-gray-800 rounded-lg"
+                                  >
+                                    <div>
+                                      <div className="text-gray-300 font-medium">{keyData.name}</div>
+                                      <div className="text-gray-500 font-mono text-xs mt-1">{keyData.key}</div>
+                                    </div>
+                                    <span className={`px-2 py-1 text-xs rounded-full ${
+                                      keyData.type === 'Active' ? 'bg-green-500/10 text-green-400' : 'bg-neon-cyan/10 text-neon-cyan'
+                                    }`}>
+                                      {keyData.type}
+                                    </span>
+                                  </motion.div>
+                                ))}
+                              </AnimatePresence>
                             </div>
                           </motion.div>
                         )}
