@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [expandedAlert, setExpandedAlert] = useState(null);
+  const [expandedKey, setExpandedKey] = useState(null);
   const [settingsView, setSettingsView] = useState(null);
   
   const [apiKeys, setApiKeys] = useState([
@@ -295,10 +296,10 @@ export default function Dashboard() {
                     transition={{ duration: 0.3 }}
                     className="p-6 h-[80vh] flex flex-col"
                   >
-                    <div className="bg-[#141b2d] rounded-2xl p-8 border border-gray-800 flex-1 flex flex-col items-center justify-start text-center overflow-y-auto">
-                      <Settings2 className="w-16 h-16 text-gray-400 mb-4 opacity-80 mt-10" />
-                      <h2 className="text-2xl font-bold text-white mb-2 relative z-10">Configuration Panel</h2>
-                      <p className="text-gray-400 max-w-md relative z-10">Access control routing, webhook integrations, and monitoring thresholds.</p>
+                    <div className="bg-[#141b2d] rounded-2xl p-8 border border-gray-800 flex-1 flex flex-col items-center justify-start text-center overflow-y-auto custom-scrollbar pr-2">
+                      <Settings2 className="w-16 h-16 text-gray-400 mb-4 opacity-80 mt-10 shrink-0" />
+                      <h2 className="text-2xl font-bold text-white mb-2 relative z-10 shrink-0">Configuration Panel</h2>
+                      <p className="text-gray-400 max-w-md relative z-10 shrink-0">Access control routing, webhook integrations, and monitoring thresholds.</p>
                       
                       <div className="mt-8 flex gap-4 w-full justify-center">
                         <motion.div 
@@ -355,25 +356,78 @@ export default function Dashboard() {
                                 )}
                               </motion.button>
                             </div>
-                            <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 overflow-x-hidden custom-scrollbar">
+                            <div className="space-y-3 w-full">
                               <AnimatePresence>
                                 {apiKeys.map(keyData => (
                                   <motion.div 
-                                    key={keyData.id}
-                                    initial={{ opacity: 0, height: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, height: 'auto', scale: 1 }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="flex justify-between items-center p-3 bg-gray-800/30 border border-gray-800 rounded-lg"
+                                    layout
+                                    key={`key-${keyData.id}`}
+                                    onClick={() => setExpandedKey(expandedKey === keyData.id ? null : keyData.id)}
+                                    className={`bg-gray-800/30 border rounded-lg overflow-hidden cursor-pointer transition-colors ${
+                                      expandedKey === keyData.id ? 'border-neon-blue shadow-[0_0_15px_rgba(0,191,255,0.1)]' : 'border-gray-800 hover:border-gray-600'
+                                    }`}
                                   >
-                                    <div>
-                                      <div className="text-gray-300 font-medium">{keyData.name}</div>
-                                      <div className="text-gray-500 font-mono text-xs mt-1">{keyData.key}</div>
-                                    </div>
-                                    <span className={`px-2 py-1 text-xs rounded-full ${
-                                      keyData.type === 'Active' ? 'bg-green-500/10 text-green-400' : 'bg-neon-cyan/10 text-neon-cyan'
-                                    }`}>
-                                      {keyData.type}
-                                    </span>
+                                    <motion.div layout className="flex justify-between items-center p-4">
+                                      <div>
+                                        <div className="text-gray-300 font-medium">{keyData.name}</div>
+                                        <div className="text-gray-500 font-mono text-xs mt-1 transition-all">
+                                          {expandedKey === keyData.id ? keyData.key.replace("...", "A9f8XQ12vZnKw0") : keyData.key}
+                                        </div>
+                                      </div>
+                                      <span className={`px-3 py-1 text-xs rounded-full font-medium ${
+                                        keyData.type === 'Active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20'
+                                      }`}>
+                                        {keyData.type}
+                                      </span>
+                                    </motion.div>
+                                    
+                                    <AnimatePresence>
+                                      {expandedKey === keyData.id && (
+                                        <motion.div 
+                                          initial={{ opacity: 0, height: 0 }}
+                                          animate={{ opacity: 1, height: 'auto' }}
+                                          exit={{ opacity: 0, height: 0 }}
+                                          className="px-4 pb-4 border-t border-gray-800/50 pt-4 flex flex-col items-start text-left cursor-auto"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <div className="grid grid-cols-2 gap-4 w-full mb-4">
+                                            <div>
+                                              <span className="text-xs text-gray-500 block">Created</span>
+                                              <span className="text-sm text-gray-300">Mar 26, 2026</span>
+                                            </div>
+                                            <div>
+                                              <span className="text-xs text-gray-500 block">Last Used</span>
+                                              <span className="text-sm text-green-400">2 mins ago</span>
+                                            </div>
+                                            <div className="col-span-2">
+                                              <span className="text-xs text-gray-500 block mb-1">Permissions</span>
+                                              <span className="text-sm flex gap-2">
+                                                <span className="px-2 py-0.5 border border-neon-blue/20 text-neon-blue bg-neon-blue/5 rounded text-[10px] font-mono">READ_LOGS</span>
+                                                <span className="px-2 py-0.5 border border-neon-blue/20 text-neon-blue bg-neon-blue/5 rounded text-[10px] font-mono">WRITE_EVENTS</span>
+                                              </span>
+                                            </div>
+                                          </div>
+                                          
+                                          <div className="flex gap-3 mt-2">
+                                            <button 
+                                              onClick={() => alert("API Key Copied to Clipboard!")}
+                                              className="px-4 py-1.5 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/40 rounded-lg hover:bg-neon-cyan hover:text-[#0b0f19] text-xs font-medium transition-all shadow-sm"
+                                            >
+                                              Copy Full Key
+                                            </button>
+                                            <button 
+                                              onClick={() => {
+                                                setApiKeys(apiKeys.filter(k => k.id !== keyData.id));
+                                                setExpandedKey(null);
+                                              }}
+                                              className="px-4 py-1.5 bg-red-500/10 text-red-500 border border-red-500/40 rounded-lg hover:bg-red-500 hover:text-white text-xs font-medium transition-all shadow-sm"
+                                            >
+                                              Revoke Key
+                                            </button>
+                                          </div>
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
                                   </motion.div>
                                 ))}
                               </AnimatePresence>
