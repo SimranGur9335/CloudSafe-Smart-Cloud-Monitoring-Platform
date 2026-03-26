@@ -5,12 +5,18 @@ import { useState } from "react";
 export default function Navbar({ activeTab = "dashboard" }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([
-    { id: 1, message: "Unusual login attempt detected", type: "critical", time: "2 min ago" },
-    { id: 2, message: "Database backup completed", type: "success", time: "1 hour ago" },
-    { id: 3, message: "New admin user added", type: "info", time: "3 hours ago" },
+    { id: 1, message: "Unusual login attempt detected", type: "critical", time: "2 min ago", isRead: false },
+    { id: 2, message: "Database backup completed", type: "success", time: "1 hour ago", isRead: false },
+    { id: 3, message: "New admin user added", type: "info", time: "3 hours ago", isRead: false },
   ]);
 
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
   const handleMarkAllRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+  };
+
+  const handleClearAll = () => {
     setNotifications([]);
   };
 
@@ -54,7 +60,7 @@ export default function Navbar({ activeTab = "dashboard" }) {
             className="relative cursor-pointer group p-2 rounded-full hover:bg-gray-800/50 transition-colors border-none outline-none"
           >
             <Bell className="w-6 h-6 text-gray-400 group-hover:text-neon-cyan transition-colors" />
-            {notifications.length > 0 && (
+            {unreadCount > 0 && (
               <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-cyan opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-neon-cyan"></span>
@@ -74,8 +80,8 @@ export default function Navbar({ activeTab = "dashboard" }) {
               >
                 <div className="p-4 border-b border-gray-800 bg-[#0f1629] flex justify-between items-center">
                   <h3 className="text-sm font-semibold text-white">Notifications</h3>
-                  {notifications.length > 0 && (
-                    <span className="text-xs text-neon-cyan font-medium bg-neon-cyan/10 px-2 py-0.5 rounded-full">{notifications.length} New</span>
+                  {unreadCount > 0 && (
+                    <span className="text-xs text-neon-cyan font-medium bg-neon-cyan/10 px-2 py-0.5 rounded-full">{unreadCount} New</span>
                   )}
                 </div>
                 <div className="max-h-80 overflow-y-auto">
@@ -86,7 +92,8 @@ export default function Navbar({ activeTab = "dashboard" }) {
                           key={notif.id}
                           initial={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="p-4 border-b border-gray-800/50 hover:bg-white/5 transition-colors cursor-pointer group"
+                          onClick={() => setNotifications(notifications.map(n => n.id === notif.id ? { ...n, isRead: true } : n))}
+                          className={`p-4 border-b border-gray-800/50 hover:bg-white/5 transition-all cursor-pointer group ${notif.isRead ? 'opacity-50 bg-[#0b0f19]/30' : ''}`}
                         >
                           <div className="flex gap-3 items-start">
                             <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${notif.type === 'critical' ? 'bg-neon-red shadow-[0_0_5px_rgba(255,0,60,0.8)]' : notif.type === 'success' ? 'bg-neon-cyan shadow-[0_0_5px_rgba(0,255,204,0.8)]' : 'bg-neon-blue shadow-[0_0_5px_rgba(0,191,255,0.8)]'}`}></div>
@@ -110,11 +117,19 @@ export default function Navbar({ activeTab = "dashboard" }) {
                   </AnimatePresence>
                 </div>
                 {notifications.length > 0 && (
-                  <div 
-                    onClick={handleMarkAllRead}
-                    className="p-3 text-center border-t border-gray-800 hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    <span className="text-xs font-semibold text-neon-blue">Mark all as read</span>
+                  <div className="flex border-t border-gray-800">
+                    <div 
+                      onClick={handleMarkAllRead}
+                      className="flex-1 p-3 text-center border-r border-gray-800 hover:bg-white/5 transition-colors cursor-pointer"
+                    >
+                      <span className="text-xs font-semibold text-neon-blue">Mark all as read</span>
+                    </div>
+                    <div 
+                      onClick={handleClearAll}
+                      className="flex-1 p-3 text-center hover:bg-white/5 transition-colors cursor-pointer"
+                    >
+                      <span className="text-xs font-semibold text-gray-500 hover:text-red-400 transition-colors">Clear All</span>
+                    </div>
                   </div>
                 )}
               </motion.div>
