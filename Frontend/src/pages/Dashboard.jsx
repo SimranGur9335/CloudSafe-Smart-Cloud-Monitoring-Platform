@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [expandedAlert, setExpandedAlert] = useState(null);
   const [expandedKey, setExpandedKey] = useState(null);
+  const [expandedWebhook, setExpandedWebhook] = useState(null);
   const [settingsView, setSettingsView] = useState(null);
   
   const [apiKeys, setApiKeys] = useState([
@@ -18,6 +19,10 @@ export default function Dashboard() {
     { id: 2, name: "Staging Log Ingest", key: "pk_test_1c24fa90...", type: "Dev" }
   ]);
   const [isGeneratingKey, setIsGeneratingKey] = useState(false);
+  const [webhooks, setWebhooks] = useState([
+    { id: 1, name: "Slack Alerting Webhook", url: "https://api.cloudsafe.internal/webhooks/slack-integration", status: "200 OK", events: ["critical_alerts", "system_down"] }
+  ]);
+  const [isAddingWebhook, setIsAddingWebhook] = useState(false);
 
   const handleGenerateKey = () => {
     setIsGeneratingKey(true);
@@ -25,6 +30,20 @@ export default function Dashboard() {
       const newKeyString = "pk_live_" + Math.random().toString(36).substring(2, 10) + "...";
       setApiKeys([{ id: Date.now(), name: "Custom Integration Key", key: newKeyString, type: "Active" }, ...apiKeys]);
       setIsGeneratingKey(false);
+    }, 1500);
+  };
+
+  const handleAddWebhook = () => {
+    setIsAddingWebhook(true);
+    setTimeout(() => {
+      setWebhooks([{ 
+        id: Date.now(), 
+        name: "Custom Integration Webhook", 
+        url: "https://api.cloudsafe.internal/webhooks/custom-" + Math.floor(Math.random() * 1000), 
+        status: "Pending", 
+        events: ["all_events"] 
+      }, ...webhooks]);
+      setIsAddingWebhook(false);
     }, 1500);
   };
 
@@ -331,7 +350,7 @@ export default function Dashboard() {
                             initial={{ opacity: 0, height: 0, y: -20 }}
                             animate={{ opacity: 1, height: 'auto', y: 0 }}
                             exit={{ opacity: 0, height: 0, y: -20 }}
-                            className="w-full max-w-2xl mt-8 text-left bg-[#0b0f19] p-6 rounded-xl border border-gray-800/50 overflow-hidden shadow-xl"
+                            className="w-full max-w-2xl mt-8 text-left bg-[#0b0f19] p-6 rounded-xl border border-gray-800/50 shadow-xl shrink-0 mb-10 overflow-visible"
                           >
                             <div className="flex justify-between items-center mb-6">
                               <h3 className="text-white font-medium text-lg">Active API Keys</h3>
@@ -356,7 +375,7 @@ export default function Dashboard() {
                                 )}
                               </motion.button>
                             </div>
-                            <div className="space-y-3 w-full">
+                            <div className="space-y-4 w-full pb-4">
                               <AnimatePresence>
                                 {apiKeys.map(keyData => (
                                   <motion.div 
@@ -364,7 +383,7 @@ export default function Dashboard() {
                                     key={`key-${keyData.id}`}
                                     onClick={() => setExpandedKey(expandedKey === keyData.id ? null : keyData.id)}
                                     className={`bg-gray-800/30 border rounded-lg overflow-hidden cursor-pointer transition-colors ${
-                                      expandedKey === keyData.id ? 'border-neon-blue shadow-[0_0_15px_rgba(0,191,255,0.1)]' : 'border-gray-800 hover:border-gray-600'
+                                      expandedKey === keyData.id ? 'border-neon-blue shadow-[0_0_15px_rgba(0,191,255,0.1)] mb-4' : 'border-gray-800 hover:border-gray-600'
                                     }`}
                                   >
                                     <motion.div layout className="flex justify-between items-center p-4">
@@ -402,16 +421,16 @@ export default function Dashboard() {
                                             <div className="col-span-2">
                                               <span className="text-xs text-gray-500 block mb-1">Permissions</span>
                                               <span className="text-sm flex gap-2">
-                                                <span className="px-2 py-0.5 border border-neon-blue/20 text-neon-blue bg-neon-blue/5 rounded text-[10px] font-mono">READ_LOGS</span>
-                                                <span className="px-2 py-0.5 border border-neon-blue/20 text-neon-blue bg-neon-blue/5 rounded text-[10px] font-mono">WRITE_EVENTS</span>
+                                                <span className="px-3 py-1 border border-neon-blue/20 text-neon-blue bg-neon-blue/5 rounded-md text-[11px] font-mono shadow-[0_0_8px_rgba(0,191,255,0.1)]">READ_LOGS</span>
+                                                <span className="px-3 py-1 border border-neon-blue/20 text-neon-blue bg-neon-blue/5 rounded-md text-[11px] font-mono shadow-[0_0_8px_rgba(0,191,255,0.1)]">WRITE_EVENTS</span>
                                               </span>
                                             </div>
                                           </div>
                                           
-                                          <div className="flex gap-3 mt-2">
+                                          <div className="flex gap-3 mt-4">
                                             <button 
                                               onClick={() => alert("API Key Copied to Clipboard!")}
-                                              className="px-4 py-1.5 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/40 rounded-lg hover:bg-neon-cyan hover:text-[#0b0f19] text-xs font-medium transition-all shadow-sm"
+                                              className="px-4 py-2 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/40 rounded-lg hover:bg-neon-cyan hover:text-[#0b0f19] text-xs font-medium transition-all shadow-sm"
                                             >
                                               Copy Full Key
                                             </button>
@@ -420,7 +439,7 @@ export default function Dashboard() {
                                                 setApiKeys(apiKeys.filter(k => k.id !== keyData.id));
                                                 setExpandedKey(null);
                                               }}
-                                              className="px-4 py-1.5 bg-red-500/10 text-red-500 border border-red-500/40 rounded-lg hover:bg-red-500 hover:text-white text-xs font-medium transition-all shadow-sm"
+                                              className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/40 rounded-lg hover:bg-red-500 hover:text-white text-xs font-medium transition-all shadow-sm"
                                             >
                                               Revoke Key
                                             </button>
@@ -440,29 +459,106 @@ export default function Dashboard() {
                             initial={{ opacity: 0, height: 0, y: -20 }}
                             animate={{ opacity: 1, height: 'auto', y: 0 }}
                             exit={{ opacity: 0, height: 0, y: -20 }}
-                            className="w-full max-w-2xl mt-8 text-left bg-[#0b0f19] p-6 rounded-xl border border-gray-800/50 overflow-hidden shadow-xl"
+                            className="w-full max-w-2xl mt-8 text-left bg-[#0b0f19] p-6 rounded-xl border border-gray-800/50 shadow-xl shrink-0 mb-10 overflow-visible"
                           >
                             <div className="flex justify-between items-center mb-6">
                               <h3 className="text-white font-medium text-lg">Webhook Endpoints</h3>
-                              <button className="px-4 py-1.5 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30 rounded-lg text-sm hover:bg-neon-cyan hover:text-black transition-colors">
-                                Add Endpoint
-                              </button>
+                              <motion.button 
+                                onClick={handleAddWebhook}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                disabled={isAddingWebhook}
+                                className="px-4 py-1.5 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30 rounded-lg text-sm hover:bg-neon-cyan hover:text-[#0b0f19] transition-colors flex items-center gap-2 font-medium shadow-[0_0_10px_rgba(0,255,204,0.1)]"
+                              >
+                                {isAddingWebhook ? (
+                                  <>
+                                    <motion.div 
+                                      animate={{ rotate: 360 }} 
+                                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                      className="w-3 h-3 border-2 border-t-transparent border-current rounded-full"
+                                    />
+                                    Adding...
+                                  </>
+                                ) : (
+                                  "Add Endpoint"
+                                )}
+                              </motion.button>
                             </div>
-                            <div className="space-y-4">
-                              <div className="p-4 bg-gray-800/30 border border-gray-800 rounded-lg">
-                                <div className="flex justify-between items-start mb-2">
-                                  <div className="text-white font-medium">Slack Alerting Webhook</div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-[pulse_2s_ease-in-out_Infinity]"></span>
-                                    <span className="text-xs text-green-500 font-mono">200 OK</span>
-                                  </div>
-                                </div>
-                                <div className="text-gray-500 font-mono text-xs mb-3 truncate">https://api.cloudsafe.internal/webhooks/slack-integration</div>
-                                <div className="flex gap-2">
-                                  <span className="text-[10px] uppercase font-bold text-gray-400 bg-gray-800 px-2 py-0.5 rounded">critical_alerts</span>
-                                  <span className="text-[10px] uppercase font-bold text-gray-400 bg-gray-800 px-2 py-0.5 rounded">system_down</span>
-                                </div>
-                              </div>
+                            <div className="space-y-4 w-full pb-4">
+                              <AnimatePresence>
+                                {webhooks.map(wh => (
+                                  <motion.div 
+                                    layout
+                                    key={`wh-${wh.id}`}
+                                    onClick={() => setExpandedWebhook(expandedWebhook === wh.id ? null : wh.id)}
+                                    className={`bg-gray-800/30 border rounded-lg overflow-hidden cursor-pointer transition-colors ${
+                                      expandedWebhook === wh.id ? 'border-neon-cyan shadow-[0_0_15px_rgba(0,255,204,0.1)] mb-4' : 'border-gray-800 hover:border-gray-600'
+                                    }`}
+                                  >
+                                    <motion.div layout className="flex justify-between items-center p-4">
+                                      <div>
+                                        <div className="text-gray-300 font-medium">{wh.name}</div>
+                                        <div className="text-gray-500 font-mono text-xs mt-1 transition-all">
+                                          {expandedWebhook === wh.id ? wh.url : wh.url.substring(0, 40) + '...'}
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 bg-[#0b0f19] px-3 py-1.5 rounded border border-gray-800">
+                                        <span className={`w-2 h-2 rounded-full ${wh.status === '200 OK' ? 'bg-green-500 animate-[pulse_2s_ease-in-out_Infinity]' : 'bg-yellow-500'}`}></span>
+                                        <span className={`text-xs font-mono font-medium ${wh.status === '200 OK' ? 'text-green-500' : 'text-yellow-500'}`}>{wh.status}</span>
+                                      </div>
+                                    </motion.div>
+                                    
+                                    <AnimatePresence>
+                                      {expandedWebhook === wh.id && (
+                                        <motion.div 
+                                          initial={{ opacity: 0, height: 0 }}
+                                          animate={{ opacity: 1, height: 'auto' }}
+                                          exit={{ opacity: 0, height: 0 }}
+                                          className="px-4 pb-4 border-t border-gray-800/50 pt-4 flex flex-col items-start text-left cursor-auto"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <div className="grid grid-cols-2 gap-4 w-full mb-4">
+                                            <div>
+                                              <span className="text-xs text-gray-500 block mb-1">Failure Rate</span>
+                                              <span className="text-sm text-gray-300 font-mono">0.05%</span>
+                                            </div>
+                                            <div>
+                                              <span className="text-xs text-gray-500 block mb-1">Total Invocations</span>
+                                              <span className="text-sm text-gray-300 font-mono">4,281</span>
+                                            </div>
+                                            <div className="col-span-2">
+                                              <span className="text-xs text-gray-500 block mb-2">Subscribed Events</span>
+                                              <span className="text-sm flex gap-2">
+                                                {wh.events.map(ev => (
+                                                  <span key={ev} className="px-2 py-0.5 border border-neon-cyan/20 text-neon-cyan bg-neon-cyan/5 rounded text-[10px] uppercase font-mono shadow-[0_0_8px_rgba(0,255,204,0.1)]">{ev}</span>
+                                                ))}
+                                              </span>
+                                            </div>
+                                          </div>
+                                          
+                                          <div className="flex gap-3 mt-4">
+                                            <button 
+                                              onClick={() => alert("Test payload dispatched successfully. Status 200 Received.")}
+                                              className="px-4 py-2 bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/40 rounded-lg hover:bg-neon-cyan hover:text-[#0b0f19] text-xs font-medium transition-all shadow-sm"
+                                            >
+                                              Test Ping
+                                            </button>
+                                            <button 
+                                              onClick={() => {
+                                                setWebhooks(webhooks.filter(w => w.id !== wh.id));
+                                                setExpandedWebhook(null);
+                                              }}
+                                              className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/40 rounded-lg hover:bg-red-500 hover:text-white text-xs font-medium transition-all shadow-sm"
+                                            >
+                                              Remove Endpoint
+                                            </button>
+                                          </div>
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
+                                  </motion.div>
+                                ))}
+                              </AnimatePresence>
                             </div>
                           </motion.div>
                         )}
